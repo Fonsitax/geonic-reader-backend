@@ -57,12 +57,8 @@ app.get('/readings/country/:country', async (req, res) => {
     const { country } = req.params;
     try {
         const client = await pool.connect();
-        const result = await client.query('SELECT * FROM readings WHERE LOWER(country) = LOWER($1)', [country]);
-
-        if (result.rows.length === 0) {
-            client.release();
-            return res.status(404).json({ error: 'No readings found for the specified country' });
-        }
+        const searchCountry = `%${country}%`;
+        const result = await client.query('SELECT * FROM readings WHERE LOWER(country) LIKE LOWER($1)', [searchCountry]);
 
         res.status(200).json(result.rows);
         client.release();
